@@ -1,0 +1,39 @@
+from pyrogram import Client
+from pyrogram.types import InputPhoneContact
+import json
+import tempfile
+from random import randint
+from time import sleep
+
+
+api_id = 
+api_hash = 
+app = Client("anon", api_id=api_id, api_hash=api_hash)
+
+
+def get_chat_id(phone_num):
+    temp_contact_name = tempfile.NamedTemporaryFile().name.split('\\')[-1]
+    good_res = list()
+    with app:
+        app.import_contacts([InputPhoneContact(phone=phone_num, first_name=temp_contact_name)])
+        contacts = app.get_contacts()
+        for contact in contacts:
+            contact_data = json.loads(str(contact))
+            if contact_data['first_name'] == temp_contact_name:
+                good_res.append(contact_data)
+                app.delete_contacts(contact_data['id'])
+    try:
+        good_res = good_res[0]['id']
+    except:
+        good_res = None
+    return good_res
+
+with open ('phone.txt', "r") as file:
+    for line in file:
+        phone = str(line)
+        id = get_chat_id(phone)
+        print(id)
+        sleep(randint(20,41))
+        with open ('id.txt', 'a') as text:
+            text.write(f'{phone} : {id} \n')
+
